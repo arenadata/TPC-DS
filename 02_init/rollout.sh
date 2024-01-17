@@ -34,6 +34,22 @@ set_segment_bashrc()
 			else
 				count=$(ssh $ext_host "grep greenplum_path ~/.bashrc" 2> /dev/null | wc -l)
 				if [ "$count" -eq "0" ]; then
+				  # if GREENPLUM_PATH is not defined, will populate it
+				  if [ -z "$GREENPLUM_PATH" ]; then
+            # we have several files to store profile data depend on version and distribution
+            for profile_filename in ~/.bashrc ~/.profile ~/.bash_profile
+            do
+              if [ -f "$profile_filename" ]; then
+                # we want to extract GREENPLUM_PATH from the line like
+                # source /usr/lib/gpdb/greenplum_path.sh
+                greenplum_path_line=$(grep -v "^#" "$profile_filename" | grep "greenplum_path" || :)
+                if [ -n "$greenplum_path_line" ]; then
+                  GREENPLUM_PATH=$(echo "$greenplum_path_line" | awk '{print $2}')
+                  break
+                fi
+              fi
+            done
+          fi
 					echo "Adding greenplum_path to $ext_host .bashrc"
 					ssh $ext_host "echo \"source $GREENPLUM_PATH\" >> ~/.bashrc"
 				fi

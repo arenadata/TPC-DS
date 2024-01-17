@@ -5,6 +5,15 @@ PWD=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 GPFDIST_PORT=$1
 GEN_DATA_PATH=$2
 
+# to use gpfdist we should source additional variables
+for profile_filename in ~/.bashrc ~/.profile ~/.bash_profile
+do
+		if [ -f "$profile_filename" ]; then
+			# don't fail if an error is happening in the admin's profile
+			source "$profile_filename" || true
+		fi
+done
+
 gpfdist -p $GPFDIST_PORT -d $GEN_DATA_PATH > gpfdist.$GPFDIST_PORT.log 2>&1 < gpfdist.$GPFDIST_PORT.log &
 pid=$!
 

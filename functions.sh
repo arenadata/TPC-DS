@@ -35,11 +35,16 @@ get_gpfdist_port()
 
 source_bashrc()
 {
-	if [ -f ~/.bashrc ]; then
-		# don't fail if an error is happening in the admin's profile
-		source ~/.bashrc || true
-	fi
-	count=$(grep -v "^#" ~/.bashrc | grep "greenplum_path" | wc -l)
+	count=0
+	# we have several files to store profile data depend on version and distribution
+	for profile_filename in ~/.bashrc ~/.profile ~/.bash_profile
+	do
+		if [ -f "$profile_filename" ]; then
+			# don't fail if an error is happening in the admin's profile
+			source "$profile_filename" || true
+			count=$((count+$(grep -v "^#" "$profile_filename" | grep "greenplum_path" | wc -l)))
+		fi
+	done
 	if [ "$count" -eq "0" ]; then
 		get_version
 		if [[ "$VERSION" == *"gpdb"* ]]; then
